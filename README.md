@@ -1,0 +1,1 @@
+# vaxitrack-ai
