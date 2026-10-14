@@ -1,94 +1,229 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Bot,
   Sparkles,
-  ShieldAlert,
   Send,
   Info,
   CheckCircle2,
-  FileText,
   Thermometer,
   Layers,
   ArrowRight,
   HelpCircle,
-  AlertTriangle
+  Clock,
+  Activity,
+  AlertCircle
 } from 'lucide-react';
 import { useColdChain } from '../../context/ColdChainContext';
+import { calculateMKT, calculateExcursionDuration } from '../../utils/coldChainCalculations';
 
 export default function AIAssistantPanel() {
   const {
     shipments,
-    alerts,
     batches,
     safeRange,
     activeExcursionsCount,
     quarantinedBatchesCount,
-    setSelectedShipmentId,
-    setActiveTab
+    demoResetCount
   } = useColdChain();
 
   const excursionShipment = shipments.find(s => s.isExcursion);
-  const quarantinedBatch = batches.find(b => b.status === 'Quarantined for Review');
+  const [selectedTargetId, setSelectedTargetId] = useState(() => excursionShipment?.id || shipments[0]?.id || 'SHP-8821');
+
+  // Update selected target if excursion state changes
+  useEffect(() => {
+    if (excursionShipment) {
+      setSelectedTargetId(excursionShipment.id);
+    }
+  }, [excursionShipment]);
+
+  const activeShipment = shipments.find(s => s.id === selectedTargetId) || excursionShipment || shipments[0];
+  const activeBatch = batches.find(b => b.batchId === activeShipment?.batchId || b.assignedShipmentId === activeShipment?.id);
+
+  // Live Deterministic Calculations (Code-Computed, Never Hallucinated)
+  const currentMKT = calculateMKT(activeShipment?.tempHistory || []);
+  const currentExcursionDuration = calculateExcursionDuration(activeShipment?.tempHistory || [], safeRange);
 
   const [chatInput, setChatInput] = useState('');
-  const [chatMessages, setChatMessages] = useState([
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState(null);
+
+  const initialGreeting = excursionShipment
+    ? `⚠️ Active excursion detected on shipment ${excursionShipment.id} (${excursionShipment.currentTemp}°C vs ${safeRange.max}°C limit). Batch ${excursionShipment.batchId} has been placed in quarantine for review.\n\nCode-calculated MKT: ${currentMKT.available ? `${currentMKT.valueCelsius}°C` : 'N/A'}. Excursion duration: ${currentExcursionDuration.durationFormatted}.\n\nAsk any operational question or select a prompt below for automated GxP SOP triage.`
+    : `All monitored cold-chain shipments are currently within the configured safe envelope (${safeRange.min.toFixed(1)}°C – ${safeRange.max.toFixed(1)}°C). Fleet telemetry integrity is nominal.\n\nCode-calculated MKT across monitored shipments is within WHO parameters. How can I assist your logistics operations?`;
+
+  const [chatMessages, setChatMessages] = useState(() => [
     {
+      id: 'msg-init',
       sender: 'ai',
-      text: excursionShipment
-        ? `⚠️ Active excursion detected on shipment ${excursionShipment.id} (${excursionShipment.currentTemp}°C vs ${safeRange.max}°C limit). Batch ${excursionShipment.batchId} has been placed in quarantine for review. Recommended operational triage protocols are highlighted below.`
-        : `All monitored cold-chain shipments are currently within the configured safe envelope (${safeRange.min.toFixed(1)}°C – ${safeRange.max.toFixed(1)}°C). Fleet telemetry integrity is nominal.`
+      text: initialGreeting,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      calculations: {
+        mkt: currentMKT,
+        duration: currentExcursionDuration
+      }
     }
   ]);
+
+  const chatStreamRef = useRef(null);
+
+  // Auto-scroll chat to latest message
+  useEffect(() => {
+    if (chatStreamRef.current) {
+      chatStreamRef.current.scrollTop = chatStreamRef.current.scrollHeight;
+    }
+  }, [chatMessages, isLoading]);
+
+  // Handle Demo Reset: restore pristine assistant chat
+  useEffect(() => {
+    if (demoResetCount > 0) {
+      setIsLoading(false);
+      setApiError(null);
+      setChatInput('');
+      const resetShipment = shipments.find(s => s.id === 'SHP-8821') || shipments[0];
+      const resetMkt = calculateMKT(resetShipment?.tempHistory || []);
+      const resetDur = calculateExcursionDuration(resetShipment?.tempHistory || [], safeRange);
+
+      setChatMessages([
+        {
+          id: `msg-reset-${Date.now()}`,
+          sender: 'ai',
+          text: `Demo reset completed. All monitored cold-chain shipments are currently within the configured safe envelope (${safeRange.min.toFixed(1)}°C – ${safeRange.max.toFixed(1)}°C). Fleet telemetry integrity is nominal.\n\nCode-calculated MKT for baseline: ${resetMkt.available ? `${resetMkt.valueCelsius}°C` : 'N/A'}. Excursion duration: ${resetDur.durationFormatted}.`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          calculations: {
+            mkt: resetMkt,
+            duration: resetDur
+          }
+        }
+      ]);
+    }
+  }, [demoResetCount]);
 
   const handleQuickPrompt = (promptText) => {
     setChatInput(promptText);
     executePrompt(promptText);
   };
 
-  const executePrompt = (query) => {
-    if (!query.trim()) return;
+  const executePrompt = async (query) => {
+    const trimmed = query.trim();
+    if (!trimmed || isLoading) return;
 
-    const userMsg = { sender: 'user', text: query };
-    let aiResponse = '';
+    const userMessageId = `user-${Date.now()}`;
+    const userMsg = {
+      id: userMessageId,
+      sender: 'user',
+      text: trimmed,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
 
-    const lower = query.toLowerCase();
-
-    if (lower.includes('excursion') || lower.includes('shp-8821') || lower.includes('analyze')) {
-      if (excursionShipment) {
-        aiResponse = `📊 Operational Incident Triage for ${excursionShipment.id}:\n` +
-          `• Sensor Reading: ${excursionShipment.currentTemp}°C (+${(excursionShipment.currentTemp - safeRange.max).toFixed(1)}°C above max limit).\n` +
-          `• Vaccine Formulation: ${excursionShipment.vaccine}.\n` +
-          `• Associated Batch: ${excursionShipment.batchId} (${excursionShipment.doses.toLocaleString()} doses).\n` +
-          `• Compliance Action: Rule-based quarantine automatically invoked. Destination receiving team must route parcel directly to Quarantine Holding Bay 3. Physical inspection of thermal data loggers required. Notice: This thermal excursion does not prove vaccine denaturation; stability release must be evaluated by authorized QA personnel against manufacturer monographs.`;
-      } else {
-        aiResponse = `Fleet Status: Zero active temperature excursions detected across all ${shipments.length} monitored shipments. All continuous probe feeds are maintaining nominal thermal equilibrium between ${safeRange.min}°C and ${safeRange.max}°C.`;
-      }
-    } else if (lower.includes('mkt') || lower.includes('formula') || lower.includes('who') || lower.includes('safe range')) {
-      aiResponse = `🔬 Cold-Chain Mean Kinetic Temperature (MKT) Guidance:\n` +
-        `• Standard WHO Envelope: 2.0°C to 8.0°C for routine biologicals.\n` +
-        `• MKT Definition: A single calculated temperature that represents the cumulative isothermal effect of temperature fluctuations over storage time (Haynes formula, activation energy ΔH ≈ 83.14 kJ/mol).\n` +
-        `• Operational Rule: Brief transient excursions (< 2 hours, < 10°C) often fall within allowable stability budgets for certain formulations, but MUST receive formal QA documentation before clinical release.`;
-    } else if (lower.includes('quarantine') || lower.includes('report') || lower.includes('protocol')) {
-      aiResponse = `📋 Quarantine Protocol Summary (SOP-401):\n` +
-        `1. Automatic Rule Trigger: Any probe telemetry exceeding safe threshold immediately flags batch in inventory ledger.\n` +
-        `2. Physical Isolation: Receiving cold depot transfers shipper into designated yellow-tagged quarantine bay.\n` +
-        `3. Chain of Custody Hold: Digital lock prevents warehouse distribution to vaccination centers.\n` +
-        `4. Authorized QA Evaluation: Quality director reviews raw data logger files, calculates MKT, and signs official release or disposal certificate.`;
-    } else if (lower.includes('carrier') || lower.includes('driver') || lower.includes('sop') || lower.includes('dry-ice')) {
-      aiResponse = `🚚 Carrier Transit SOP Recommendations:\n` +
-        `• Immediate Action: Carrier dispatch should contact refrigerated vehicle driver to verify secondary cooling system status and ensure cab-to-cargo door seal integrity.\n` +
-        `• Contingency: If vehicle refrigeration failure is confirmed, divert to nearest partner depot for dry-ice re-icing or eutectic plate exchange within 90 minutes.`;
-    } else {
-      aiResponse = `Telemetry Copilot Analysis: Based on current sensor streams, ${shipments.length} shipments are tracked. Active excursions: ${activeExcursionsCount}. Quarantined batches: ${quarantinedBatchesCount}. All decision gates adhere strictly to predefined threshold rules. For clinical release determinations, consult the authorized Quality Director.`;
-    }
-
-    setChatMessages(prev => [...prev, userMsg, { sender: 'ai', text: aiResponse }]);
+    setChatMessages(prev => [...prev, userMsg]);
     setChatInput('');
+    setIsLoading(true);
+    setApiError(null);
+
+    // Prepare live shipment & fleet payload
+    const payload = {
+      question: trimmed,
+      shipment: activeShipment,
+      safeRange,
+      batch: activeBatch,
+      fleetContext: {
+        totalShipments: shipments.length,
+        activeExcursionsCount,
+        quarantinedBatchesCount,
+      }
+    };
+
+    try {
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle server/API error response gracefully
+        const errorText = data?.error || `API returned status ${response.status}`;
+        const isMissingKey = data?.code === 'MISSING_API_KEY';
+
+        let userFacingError = errorText;
+        if (isMissingKey) {
+          userFacingError = `⚠️ Gemini API Key Required:\n${errorText}\n\nTo enable live AI inference on Vercel or locally:\n1. Set GEMINI_API_KEY in your Vercel Project Settings > Environment Variables.\n2. For local testing, add GEMINI_API_KEY=your_key to a .env file.\n\nNote: Deterministic MKT and Excursion Duration calculations remain fully operational without the key.`;
+        }
+
+        setApiError({
+          code: data?.code || 'API_ERROR',
+          message: errorText
+        });
+
+        setChatMessages(prev => [
+          ...prev,
+          {
+            id: `err-${Date.now()}`,
+            sender: 'ai',
+            isError: true,
+            text: userFacingError,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            calculations: data?.calculations || {
+              mkt: currentMKT,
+              duration: currentExcursionDuration
+            }
+          }
+        ]);
+        return;
+      }
+
+      // Success: render response from Gemini 3.8 Flash
+      setChatMessages(prev => [
+        ...prev,
+        {
+          id: `ai-${Date.now()}`,
+          sender: 'ai',
+          text: data.answer || 'Analysis complete.',
+          model: data.model || 'gemini-3.8-flash',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          calculations: data.calculations || {
+            mkt: currentMKT,
+            duration: currentExcursionDuration
+          },
+          facts: data.facts
+        }
+      ]);
+
+    } catch (networkErr) {
+      console.error('Copilot network fetch failed:', networkErr);
+      const msg = `Network connection to /api/analyze failed. Check your connection or local dev server. (${networkErr.message})`;
+      setApiError({ code: 'NETWORK_ERROR', message: msg });
+
+      setChatMessages(prev => [
+        ...prev,
+        {
+          id: `err-${Date.now()}`,
+          sender: 'ai',
+          isError: true,
+          text: msg,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          calculations: {
+            mkt: currentMKT,
+            duration: currentExcursionDuration
+          }
+        }
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChatSubmit = (e) => {
     e.preventDefault();
     executePrompt(chatInput);
+  };
+
+  const handleClearChat = () => {
+    setChatMessages([]);
   };
 
   return (
@@ -108,13 +243,51 @@ export default function AIAssistantPanel() {
                 </h3>
                 <span className="ai-tag-chip">
                   <Sparkles size={11} style={{ marginRight: 4, display: 'inline' }} />
-                  AI-Generated Advisory
+                  Gemini 3.8 Flash
+                </span>
+                <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: '#F1F5F9',
+                  color: '#64748B',
+                  border: '1px solid #E2E8F0'
+                }}>
+                  Simulated Telemetry
                 </span>
               </div>
               <p style={{ fontSize: '0.78rem', color: '#64748B', margin: '2px 0 0' }}>
-                Operational cold-chain telemetry synthesis &amp; deviation response protocols
+                GxP cold-chain deviation analysis, Mean Kinetic Temperature evaluation &amp; SOP routing
               </p>
             </div>
+          </div>
+
+          {/* Consignment Target Switcher */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '0.74rem', color: '#64748B', fontWeight: 600 }}>
+              Consignment:
+            </span>
+            <select
+              value={selectedTargetId}
+              onChange={e => setSelectedTargetId(e.target.value)}
+              style={{
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                padding: '4px 8px',
+                borderRadius: '6px',
+                border: '1px solid #CBD5E1',
+                background: '#FFFFFF',
+                color: '#0F172A'
+              }}
+              aria-label="Select shipment for AI analysis"
+            >
+              {shipments.map(s => (
+                <option key={s.id} value={s.id}>
+                  {s.id} {s.isExcursion ? '⚠️ (Excursion)' : '✓'} ({s.currentTemp}°C)
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -126,8 +299,33 @@ export default function AIAssistantPanel() {
             <div style={{ marginTop: '3px' }}>
               The VaxiTrack AI Copilot synthesizes logistics telemetry and standard operating procedures for transit routing, incident logging, and cold-bay staging only.
               <strong> Quarantine triggers are strictly rule-based</strong>. A temperature excursion indicates a thermal deviation requiring investigation, not definitive proof of vaccine spoilage.
-              Vaccine efficacy and stability release must be evaluated by certified QA personnel per manufacturer monographs.
+              Vaccine efficacy and stability release must be evaluated by certified QA personnel per manufacturer monographs (SOP-704). The AI model cannot independently authorize release or declare spoilage.
             </div>
+          </div>
+        </div>
+
+        {/* Live Code-Calculated Telemetry Badges (Deterministic, Never Hallucinated) */}
+        <div className="ai-calc-pill-row">
+          <div className="ai-calc-pill" title="Haynes Mean Kinetic Temperature computed deterministically over recorded telemetry readings">
+            <Thermometer size={13} color="#0D9488" />
+            <span>Deterministic MKT:</span>
+            <strong>
+              {currentMKT.available ? `${currentMKT.valueCelsius}°C` : 'Unavailable'}
+            </strong>
+          </div>
+          <div style={{ color: '#CBD5E1' }}>|</div>
+          <div className="ai-calc-pill" title="Thermal deviation duration evaluated across logged probe samples">
+            <Clock size={13} color="#0D9488" />
+            <span>Excursion Duration:</span>
+            <strong>
+              {currentExcursionDuration.durationFormatted}
+            </strong>
+          </div>
+          <div style={{ color: '#CBD5E1' }}>|</div>
+          <div className="ai-calc-pill" title="All sensors in demo stream are synthetically generated">
+            <Activity size={13} color="#0D9488" />
+            <span>Mode:</span>
+            <strong>Synthetic Telemetry Stream</strong>
           </div>
         </div>
 
@@ -135,27 +333,27 @@ export default function AIAssistantPanel() {
         <div className="incident-summary-block">
           <div className="summary-heading">
             <Thermometer size={16} color="#0D9488" />
-            <span>Active Incident Synthesis</span>
+            <span>Consignment Telemetry Facts ({activeShipment?.id})</span>
           </div>
 
           <div className="summary-content">
-            {excursionShipment ? (
+            {activeShipment?.isExcursion ? (
               <div>
                 <p>
-                  <strong>Incident Alert on {excursionShipment.id}:</strong> At {excursionShipment.lastPing}, internal temperature spiked to{' '}
-                  <span style={{ color: '#E11D48', fontWeight: 700 }}>{excursionShipment.currentTemp}°C</span>, exceeding the configured safe threshold of{' '}
-                  {safeRange.max}°C. The consignment is carrying <strong>{excursionShipment.doses.toLocaleString()} doses</strong> of {excursionShipment.vaccine}.
+                  <strong>Incident Alert on {activeShipment.id}:</strong> Sensor telemetry recorded{' '}
+                  <span style={{ color: '#E11D48', fontWeight: 700 }}>{activeShipment.currentTemp}°C</span>, exceeding the configured safe threshold of{' '}
+                  {safeRange.max}°C by +{(activeShipment.currentTemp - safeRange.max).toFixed(1)}°C. Carrying <strong>{activeShipment.doses?.toLocaleString()} doses</strong> of {activeShipment.vaccine}.
                 </p>
-                <p style={{ marginTop: '8px' }}>
-                  <strong>Rule-Based Safeguard Activated:</strong> Batch{' '}
-                  <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700 }}>{excursionShipment.batchId}</span> has been automatically flagged as{' '}
-                  <strong style={{ color: '#9F1239' }}>Quarantined for Review</strong>. The shipment is currently en route to {excursionShipment.destination}.
+                <p style={{ marginTop: '6px' }}>
+                  <strong>Rule-Based Hold Status:</strong> Associated Batch{' '}
+                  <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700 }}>{activeShipment.batchId}</span> is flagged as{' '}
+                  <strong style={{ color: '#9F1239' }}>{activeBatch?.status || 'Quarantined for Review'}</strong>. Destination: {activeShipment.destination}.
                 </p>
               </div>
             ) : (
               <p>
-                <strong>Cold-Chain Nominal:</strong> All {shipments.length} active consignments are operating within the standard WHO safe envelope ({safeRange.min}°C – {safeRange.max}°C).
-                Mean telemetry variance is ±0.3°C, indicating stable compressor performance across all carrier refrigeration units.
+                <strong>Cold-Chain Nominal on {activeShipment?.id}:</strong> Probe reading is currently{' '}
+                <strong style={{ color: '#059669' }}>{activeShipment?.currentTemp}°C</strong> within safe envelope ({safeRange.min}°C – {safeRange.max}°C). Carrying {activeShipment?.doses?.toLocaleString()} doses of {activeShipment?.vaccine}.
               </p>
             )}
           </div>
@@ -221,47 +419,131 @@ export default function AIAssistantPanel() {
 
         {/* Interactive Chat Stream */}
         <div style={{ marginTop: '8px', borderTop: '1px solid #E2E8F0', paddingTop: '16px' }}>
-          <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '8px' }}>
-            Interactive Copilot Query Session
-          </div>
-
           <div style={{
-            maxHeight: '220px',
-            overflowY: 'auto',
+            fontSize: '0.82rem',
+            fontWeight: 700,
+            color: '#334155',
+            marginBottom: '8px',
             display: 'flex',
-            flexDirection: 'column',
-            gap: '10px',
-            paddingRight: '6px'
+            alignItems: 'center',
+            justifyContent: 'space-between'
           }}>
-            {chatMessages.map((msg, idx) => (
-              <div
-                key={idx}
+            <span>Interactive Copilot Query Session (Gemini 3.8 Flash)</span>
+            {chatMessages.length > 0 && (
+              <button
+                type="button"
+                onClick={handleClearChat}
                 style={{
-                  alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
-                  maxWidth: '85%',
-                  background: msg.sender === 'user' ? '#0D9488' : '#F1F5F9',
-                  color: msg.sender === 'user' ? '#FFFFFF' : '#0F172A',
-                  padding: '10px 14px',
-                  borderRadius: '10px',
-                  fontSize: '0.82rem',
-                  lineHeight: 1.5,
-                  whiteSpace: 'pre-line'
+                  background: 'none',
+                  border: 'none',
+                  color: '#64748B',
+                  fontSize: '0.72rem',
+                  cursor: 'pointer',
+                  padding: '2px 6px',
+                  borderRadius: '4px'
                 }}
+                title="Clear current query transcript"
               >
-                {msg.text}
-              </div>
-            ))}
+                Clear History
+              </button>
+            )}
           </div>
 
+          <div className="ai-chat-stream" ref={chatStreamRef}>
+            {chatMessages.length === 0 ? (
+              <div className="ai-empty-state">
+                <HelpCircle size={28} color="#94A3B8" />
+                <p>
+                  <strong>No queries yet.</strong> Ask Copilot about the active temperature excursion on {activeShipment?.id}, MKT calculation guidance, or carrier reefer contingency SOPs.
+                </p>
+              </div>
+            ) : (
+              chatMessages.map(msg => (
+                <div
+                  key={msg.id}
+                  className={
+                    msg.sender === 'user'
+                      ? 'ai-message-user'
+                      : msg.isError
+                        ? 'ai-message-error'
+                        : 'ai-message-assistant'
+                  }
+                >
+                  <div style={{ whiteSpace: 'pre-wrap' }}>
+                    {msg.text}
+                  </div>
+
+                  {msg.sender === 'ai' && !msg.isError && (
+                    <div className="ai-meta-disclaimer">
+                      <CheckCircle2 size={12} color="#0D9488" />
+                      <span>
+                        AI Advisory • Rule-based quarantine triggers apply • Release requires authorized QA Director review (SOP-704)
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+
+            {/* Loading Indicator */}
+            {isLoading && (
+              <div className="ai-loading-bubble">
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  <span className="typing-dot" />
+                  <span className="typing-dot" />
+                  <span className="typing-dot" />
+                </div>
+                <span>Incident Copilot is analyzing cold-chain telemetry with Gemini 3.8 Flash...</span>
+              </div>
+            )}
+          </div>
+
+          {/* Error Notification Alert */}
+          {apiError && (
+            <div style={{
+              background: '#FFF1F2',
+              border: '1px solid #FECDD3',
+              borderRadius: '8px',
+              padding: '8px 12px',
+              marginTop: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '0.78rem',
+              color: '#9F1239'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <AlertCircle size={15} color="#E11D48" />
+                <span>{apiError.message}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setApiError(null)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9F1239', fontWeight: 700, fontSize: '0.9rem' }}
+                aria-label="Dismiss error"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+          {/* Chat Input Form */}
           <form onSubmit={handleChatSubmit} className="ai-chat-box">
             <input
               type="text"
               className="ai-chat-input"
-              placeholder="Ask Copilot about cold-chain deviations, MKT, or carrier SOPs..."
+              placeholder={`Ask Copilot about ${activeShipment?.id} excursion, MKT formula, or carrier SOPs...`}
               value={chatInput}
               onChange={e => setChatInput(e.target.value)}
+              disabled={isLoading}
+              aria-label="Ask Incident Copilot"
             />
-            <button type="submit" className="ai-send-btn" title="Send query to Copilot">
+            <button
+              type="submit"
+              className="ai-send-btn"
+              title="Send query to Copilot"
+              disabled={isLoading || !chatInput.trim()}
+            >
               <Send size={16} />
             </button>
           </form>
@@ -280,9 +562,10 @@ export default function AIAssistantPanel() {
             <button
               type="button"
               className="prompt-btn"
-              onClick={() => handleQuickPrompt('Analyze current thermal excursion on SHP-8821')}
+              onClick={() => handleQuickPrompt(`Analyze current thermal excursion on ${activeShipment?.id || 'SHP-8821'}`)}
+              disabled={isLoading}
             >
-              <span>Analyze SHP-8821 Excursion</span>
+              <span>Analyze {activeShipment?.id || 'SHP-8821'} Excursion</span>
               <ArrowRight size={13} />
             </button>
 
@@ -290,6 +573,7 @@ export default function AIAssistantPanel() {
               type="button"
               className="prompt-btn"
               onClick={() => handleQuickPrompt('Explain WHO 2°C–8°C Cold Chain Standard & MKT Formula')}
+              disabled={isLoading}
             >
               <span>WHO 2°C–8°C Standard &amp; MKT</span>
               <ArrowRight size={13} />
@@ -299,6 +583,7 @@ export default function AIAssistantPanel() {
               type="button"
               className="prompt-btn"
               onClick={() => handleQuickPrompt('Generate Cold-Chain Deviation Audit Summary')}
+              disabled={isLoading}
             >
               <span>Quarantine Deviation Protocol</span>
               <ArrowRight size={13} />
@@ -308,6 +593,7 @@ export default function AIAssistantPanel() {
               type="button"
               className="prompt-btn"
               onClick={() => handleQuickPrompt('What are the carrier SOP steps for refrigeration failure?')}
+              disabled={isLoading}
             >
               <span>Carrier Contingency SOPs</span>
               <ArrowRight size={13} />

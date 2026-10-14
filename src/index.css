@@ -1411,6 +1411,162 @@ input, select, textarea {
   background: var(--teal-hover);
 }
 
+.ai-send-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ai-chat-stream {
+  max-height: 380px;
+  min-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 4px 8px 0;
+  scroll-behavior: smooth;
+}
+
+.ai-message-user {
+  align-self: flex-end;
+  max-width: 85%;
+  background: #0D9488;
+  color: #FFFFFF;
+  padding: 10px 14px;
+  border-radius: 14px 14px 2px 14px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.ai-message-assistant {
+  align-self: flex-start;
+  max-width: 92%;
+  background: #F8FAFC;
+  color: #0F172A;
+  border: 1px solid #E2E8F0;
+  padding: 14px 16px;
+  border-radius: 14px 14px 14px 2px;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.ai-message-assistant h3,
+.ai-message-assistant h4 {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 10px 0 4px 0;
+}
+
+.ai-message-assistant h3:first-child {
+  margin-top: 0;
+}
+
+.ai-message-assistant ul,
+.ai-message-assistant ol {
+  margin: 6px 0 6px 18px;
+  padding: 0;
+}
+
+.ai-message-assistant li {
+  margin-bottom: 4px;
+}
+
+.ai-message-error {
+  align-self: flex-start;
+  max-width: 90%;
+  background: #FFF1F2;
+  color: #9F1239;
+  border: 1px solid #FECDD3;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 0.80rem;
+  line-height: 1.5;
+}
+
+.ai-loading-bubble {
+  align-self: flex-start;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  padding: 10px 14px;
+  border-radius: 14px 14px 14px 2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.78rem;
+  color: #475569;
+}
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #0D9488;
+  border-radius: 50%;
+  animation: typing-bounce 1.4s infinite ease-in-out both;
+}
+
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typing-bounce {
+  0%, 80%, 100% { transform: scale(0); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.ai-calc-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+  padding: 8px 10px;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  font-size: 0.73rem;
+}
+
+.ai-calc-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.ai-calc-pill strong {
+  font-family: var(--font-mono);
+  color: #0D9488;
+}
+
+.ai-empty-state {
+  text-align: center;
+  padding: 30px 16px;
+  color: #64748B;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-empty-state p {
+  font-size: 0.82rem;
+  max-width: 320px;
+  margin: 0;
+}
+
+.ai-meta-disclaimer {
+  font-size: 0.69rem;
+  color: #64748B;
+  border-top: 1px dashed #CBD5E1;
+  margin-top: 8px;
+  padding-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 /* ==========================================================================
    Modals & Overlays
    ========================================================================== */

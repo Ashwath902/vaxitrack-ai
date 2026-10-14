@@ -20,6 +20,8 @@ export function ColdChainProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const [isSimulatingTelemetry, setIsSimulatingTelemetry] = useState(true);
   const [lastTelemetryTick, setLastTelemetryTick] = useState(new Date().toLocaleTimeString());
+  const [demoResetCount, setDemoResetCount] = useState(0);
+
 
   // Toast Helper
   const addToast = useCallback((title, message, type = 'info') => {
@@ -235,6 +237,7 @@ export function ColdChainProvider({ children }) {
     setCustodyLogs(INITIAL_CUSTODY_LOGS);
     setSafeRange(INITIAL_SAFE_RANGE);
     setSelectedShipmentId(null);
+    setDemoResetCount(c => c + 1);
     addToast('Demo Reset Completed', 'All shipments, alerts, and batches restored to pristine initial conditions.', 'info');
   }, [addToast]);
 
@@ -341,6 +344,7 @@ export function ColdChainProvider({ children }) {
     authorizeBatchRelease,
     addCustodyHandoff,
     resetDemo,
+    demoResetCount,
     updateSafeRange,
     addToast,
     removeToast,
