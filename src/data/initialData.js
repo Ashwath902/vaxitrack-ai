@@ -1,0 +1,545 @@
+// Synthetic Initial Cold-Chain Logistics Dataset for VaxiTrack AI
+
+export const INITIAL_SAFE_RANGE = {
+  min: 2.0,
+  max: 8.0,
+};
+
+export const INITIAL_SHIPMENTS = [
+  {
+    id: "SHP-8821",
+    vaccine: "mRNA COVID-19 (Spikevax Bivalent)",
+    batchId: "BT-MRNA-2026-08",
+    currentTemp: 4.3,
+    targetRange: { min: 2.0, max: 8.0 },
+    status: "Within Safe Range",
+    isExcursion: false,
+    origin: "Basel BioPharma Hub, Switzerland",
+    destination: "Mt. Sinai Cold Storage Bay 4, New York, NY",
+    carrier: "CryoLogistics Express • Flight LX18",
+    batteryPercent: 96,
+    humidity: 43,
+    ambientTemp: 21.4,
+    doses: 8400,
+    eta: "Today, 16:45 EST",
+    milesRemaining: 184,
+    lastPing: "Just now",
+    tempHistory: [
+      { time: "09:00", temp: 4.1, safeMin: 2.0, safeMax: 8.0 },
+      { time: "09:30", temp: 4.2, safeMin: 2.0, safeMax: 8.0 },
+      { time: "10:00", temp: 4.0, safeMin: 2.0, safeMax: 8.0 },
+      { time: "10:30", temp: 4.4, safeMin: 2.0, safeMax: 8.0 },
+      { time: "11:00", temp: 4.3, safeMin: 2.0, safeMax: 8.0 },
+      { time: "11:30", temp: 4.5, safeMin: 2.0, safeMax: 8.0 },
+      { time: "12:00", temp: 4.3, safeMin: 2.0, safeMax: 8.0 },
+    ],
+    gpsBreadcrumbs: [
+      {
+        id: "wp-1",
+        name: "Basel Central Distribution Center",
+        location: "Basel, Switzerland",
+        lat: 47.5596,
+        lng: 7.5886,
+        time: "06:15 UTC",
+        temp: 3.9,
+        status: "completed",
+        carrier: "Basel Depot Dispatch",
+        note: "Initial pallet thermal equilibration verified. Cryo-shield active."
+      },
+      {
+        id: "wp-2",
+        name: "Zurich International Cargo Hub (ZRH)",
+        location: "Zurich, Switzerland",
+        lat: 47.4582,
+        lng: 8.5555,
+        time: "08:40 UTC",
+        temp: 4.1,
+        status: "completed",
+        carrier: "Swiss Air Freight",
+        note: "Air cargo ramp transfer. Tamper-evident barcode scanned."
+      },
+      {
+        id: "wp-3",
+        name: "JFK Transatlantic Cold Vault",
+        location: "Queens, New York",
+        lat: 40.6413,
+        lng: -73.7781,
+        time: "13:20 EST",
+        temp: 4.3,
+        status: "completed",
+        carrier: "CryoLogistics Ground Express",
+        note: "Customs expedited clearance approved. Secondary cooling inspected."
+      },
+      {
+        id: "wp-4",
+        name: "Newark Interstate Transit Route (I-95)",
+        location: "Newark, NJ",
+        lat: 40.7357,
+        lng: -74.1724,
+        time: "14:15 EST",
+        temp: 4.3,
+        status: "current",
+        carrier: "Refrigerated Van Unit #12",
+        note: "Active GPS breadcrumb. Van telematics indicate standard compressor cycling."
+      },
+      {
+        id: "wp-5",
+        name: "Mt. Sinai Cold Storage Bay 4",
+        location: "Manhattan, New York",
+        lat: 40.7903,
+        lng: -73.9535,
+        time: "16:45 EST (Est.)",
+        temp: null,
+        status: "upcoming",
+        carrier: "Mt. Sinai Receiving QA",
+        note: "Designated ultracold receiver bay. Automated quarantine staging available."
+      }
+    ]
+  },
+  {
+    id: "SHP-7742",
+    vaccine: "MMR II (Measles, Mumps, Rubella)",
+    batchId: "BT-MMR-9042",
+    currentTemp: 3.8,
+    targetRange: { min: 2.0, max: 8.0 },
+    status: "Within Safe Range",
+    isExcursion: false,
+    origin: "Merck Manufacturing Plant, West Point, PA",
+    destination: "Children's National Hospital, Washington, DC",
+    carrier: "PharmaFlight Express • Route 71",
+    batteryPercent: 89,
+    humidity: 41,
+    ambientTemp: 19.8,
+    doses: 5200,
+    eta: "Today, 15:30 EST",
+    milesRemaining: 68,
+    lastPing: "1 min ago",
+    tempHistory: [
+      { time: "09:00", temp: 3.6, safeMin: 2.0, safeMax: 8.0 },
+      { time: "09:30", temp: 3.7, safeMin: 2.0, safeMax: 8.0 },
+      { time: "10:00", temp: 3.8, safeMin: 2.0, safeMax: 8.0 },
+      { time: "10:30", temp: 3.9, safeMin: 2.0, safeMax: 8.0 },
+      { time: "11:00", temp: 3.8, safeMin: 2.0, safeMax: 8.0 },
+      { time: "11:30", temp: 3.7, safeMin: 2.0, safeMax: 8.0 },
+      { time: "12:00", temp: 3.8, safeMin: 2.0, safeMax: 8.0 },
+    ],
+    gpsBreadcrumbs: [
+      {
+        id: "wp-21",
+        name: "West Point Production Logistics",
+        location: "West Point, PA",
+        lat: 40.1776,
+        lng: -75.3168,
+        time: "07:30 EST",
+        temp: 3.6,
+        status: "completed",
+        carrier: "Merck Cold Fleet",
+        note: "Batch loading verified. Pre-conditioned eutectic plates."
+      },
+      {
+        id: "wp-22",
+        name: "Philadelphia Distribution Crossdock",
+        location: "Philadelphia, PA",
+        lat: 39.9526,
+        lng: -75.1652,
+        time: "10:15 EST",
+        temp: 3.7,
+        status: "completed",
+        carrier: "PharmaFlight Ground",
+        note: "Transfer inspection OK."
+      },
+      {
+        id: "wp-23",
+        name: "Baltimore Corridor Mile 42",
+        location: "Baltimore, MD",
+        lat: 39.2904,
+        lng: -76.6122,
+        time: "12:10 EST",
+        temp: 3.8,
+        status: "current",
+        carrier: "PharmaFlight Van Unit #07",
+        note: "Cruising speed 62mph. Internal chamber thermal stability verified."
+      },
+      {
+        id: "wp-24",
+        name: "Children's National Hospital Pharmacy",
+        location: "Washington, DC",
+        lat: 38.9283,
+        lng: -77.0146,
+        time: "15:30 EST (Est.)",
+        temp: null,
+        status: "upcoming",
+        carrier: "Receiving Dock B",
+        note: "Pediatric pharmacy cold room receiving dock."
+      }
+    ]
+  },
+  {
+    id: "SHP-9104",
+    vaccine: "Rotavirus Pentavalent (RotaTeq)",
+    batchId: "BT-ROTA-4410",
+    currentTemp: 5.2,
+    targetRange: { min: 2.0, max: 8.0 },
+    status: "Within Safe Range",
+    isExcursion: false,
+    origin: "Sanofi Pasteur Hub, Swiftwater, PA",
+    destination: "Boston Medical Center Regional Depository",
+    carrier: "BioTransit Cold-Chain Logistics",
+    batteryPercent: 92,
+    humidity: 46,
+    ambientTemp: 22.0,
+    doses: 10500,
+    eta: "Today, 18:15 EST",
+    milesRemaining: 210,
+    lastPing: "Just now",
+    tempHistory: [
+      { time: "09:00", temp: 5.0, safeMin: 2.0, safeMax: 8.0 },
+      { time: "09:30", temp: 5.1, safeMin: 2.0, safeMax: 8.0 },
+      { time: "10:00", temp: 5.3, safeMin: 2.0, safeMax: 8.0 },
+      { time: "10:30", temp: 5.2, safeMin: 2.0, safeMax: 8.0 },
+      { time: "11:00", temp: 5.1, safeMin: 2.0, safeMax: 8.0 },
+      { time: "11:30", temp: 5.2, safeMin: 2.0, safeMax: 8.0 },
+      { time: "12:00", temp: 5.2, safeMin: 2.0, safeMax: 8.0 },
+    ],
+    gpsBreadcrumbs: [
+      {
+        id: "wp-31",
+        name: "Swiftwater Vaccine Packaging Facility",
+        location: "Swiftwater, PA",
+        lat: 41.0968,
+        lng: -75.3271,
+        time: "08:00 EST",
+        temp: 5.0,
+        status: "completed",
+        carrier: "Sanofi Logistics",
+        note: "Insulated shipper sealed with temperature logger ID #TL-4410."
+      },
+      {
+        id: "wp-32",
+        name: "Hartford Depot Transfer Station",
+        location: "Hartford, CT",
+        lat: 41.7658,
+        lng: -72.6734,
+        time: "11:45 EST",
+        temp: 5.1,
+        status: "current",
+        carrier: "BioTransit Express",
+        note: "Restock checkpoint. Logger verified in range."
+      },
+      {
+        id: "wp-33",
+        name: "Boston Medical Center Depository",
+        location: "Boston, MA",
+        lat: 42.3361,
+        lng: -71.0728,
+        time: "18:15 EST (Est.)",
+        temp: null,
+        status: "upcoming",
+        carrier: "BMC Central Supply",
+        note: "Hospital clinical pharmacy cold storage."
+      }
+    ]
+  },
+  {
+    id: "SHP-6320",
+    vaccine: "Varicella Live Virus (Varivax)",
+    batchId: "BT-VARI-1193",
+    currentTemp: 4.7,
+    targetRange: { min: 2.0, max: 8.0 },
+    status: "Within Safe Range",
+    isExcursion: false,
+    origin: "Durham BioLogistics Center, NC",
+    destination: "Emory University Hospital Depot, Atlanta, GA",
+    carrier: "Apex Cold Transporters",
+    batteryPercent: 84,
+    humidity: 48,
+    ambientTemp: 23.5,
+    doses: 6000,
+    eta: "Tomorrow, 09:00 EST",
+    milesRemaining: 340,
+    lastPing: "3 mins ago",
+    tempHistory: [
+      { time: "09:00", temp: 4.5, safeMin: 2.0, safeMax: 8.0 },
+      { time: "09:30", temp: 4.6, safeMin: 2.0, safeMax: 8.0 },
+      { time: "10:00", temp: 4.8, safeMin: 2.0, safeMax: 8.0 },
+      { time: "10:30", temp: 4.7, safeMin: 2.0, safeMax: 8.0 },
+      { time: "11:00", temp: 4.6, safeMin: 2.0, safeMax: 8.0 },
+      { time: "11:30", temp: 4.7, safeMin: 2.0, safeMax: 8.0 },
+      { time: "12:00", temp: 4.7, safeMin: 2.0, safeMax: 8.0 },
+    ],
+    gpsBreadcrumbs: [
+      {
+        id: "wp-41",
+        name: "Durham Logistics Hub",
+        location: "Durham, NC",
+        lat: 35.9940,
+        lng: -78.8986,
+        time: "07:15 EST",
+        temp: 4.5,
+        status: "completed",
+        carrier: "Apex Primary Freight",
+        note: "Departure checklist confirmed."
+      },
+      {
+        id: "wp-42",
+        name: "Charlotte Gateway Checkpoint",
+        location: "Charlotte, NC",
+        lat: 35.2271,
+        lng: -80.8431,
+        time: "10:40 EST",
+        temp: 4.7,
+        status: "current",
+        carrier: "Apex Freight Unit 4",
+        note: "Weigh station transit. Secondary temperature probe steady."
+      },
+      {
+        id: "wp-43",
+        name: "Emory University Hospital Depot",
+        location: "Atlanta, GA",
+        lat: 33.7925,
+        lng: -84.3239,
+        time: "Tomorrow, 09:00 EST",
+        temp: null,
+        status: "upcoming",
+        carrier: "Emory Receiving",
+        note: "Cold dock receiving bay."
+      }
+    ]
+  },
+  {
+    id: "SHP-5519",
+    vaccine: "FluZone High-Dose Quadrivalent",
+    batchId: "BT-FLU-7820",
+    currentTemp: 3.4,
+    targetRange: { min: 2.0, max: 8.0 },
+    status: "Within Safe Range",
+    isExcursion: false,
+    origin: "Indianapolis Life Sciences Park, IN",
+    destination: "Northwestern Memorial Hospital, Chicago, IL",
+    carrier: "Midwest CryoExpress",
+    batteryPercent: 98,
+    humidity: 40,
+    ambientTemp: 18.2,
+    doses: 12000,
+    eta: "Today, 14:00 CST",
+    milesRemaining: 42,
+    lastPing: "Just now",
+    tempHistory: [
+      { time: "09:00", temp: 3.3, safeMin: 2.0, safeMax: 8.0 },
+      { time: "09:30", temp: 3.4, safeMin: 2.0, safeMax: 8.0 },
+      { time: "10:00", temp: 3.5, safeMin: 2.0, safeMax: 8.0 },
+      { time: "10:30", temp: 3.4, safeMin: 2.0, safeMax: 8.0 },
+      { time: "11:00", temp: 3.3, safeMin: 2.0, safeMax: 8.0 },
+      { time: "11:30", temp: 3.4, safeMin: 2.0, safeMax: 8.0 },
+      { time: "12:00", temp: 3.4, safeMin: 2.0, safeMax: 8.0 },
+    ],
+    gpsBreadcrumbs: [
+      {
+        id: "wp-51",
+        name: "Indianapolis Cold Distribution Depot",
+        location: "Indianapolis, IN",
+        lat: 39.7684,
+        lng: -86.1581,
+        time: "06:00 CST",
+        temp: 3.3,
+        status: "completed",
+        carrier: "Midwest Depot Dispatch",
+        note: "Refrigerated tractor trailer dispatch."
+      },
+      {
+        id: "wp-52",
+        name: "I-65 Northbound Mile 152",
+        location: "Lafayette, IN",
+        lat: 40.4173,
+        lng: -86.8753,
+        time: "09:20 CST",
+        temp: 3.4,
+        status: "current",
+        carrier: "Midwest Cryo Trailer 8",
+        note: "Compressor run time nominal. En route to Chicago."
+      },
+      {
+        id: "wp-53",
+        name: "Northwestern Memorial Hospital Depot",
+        location: "Chicago, IL",
+        lat: 41.8954,
+        lng: -87.6217,
+        time: "Today, 14:00 CST",
+        temp: null,
+        status: "upcoming",
+        carrier: "Northwestern Pharmacy",
+        note: "Central clinical pharmacy intake."
+      }
+    ]
+  }
+];
+
+export const INITIAL_BATCHES = [
+  {
+    batchId: "BT-MRNA-2026-08",
+    vaccineName: "mRNA COVID-19 (Spikevax Bivalent)",
+    manufacturer: "Moderna / Lonza Biotech",
+    totalDoses: 8400,
+    mfgDate: "2026-08-12",
+    expiryDate: "2027-02-12",
+    assignedShipmentId: "SHP-8821",
+    status: "In Transit", // In Transit, Within Range, Quarantined for Review, Released
+    quarantineReason: null,
+    quarantinedAt: null,
+    qaSignOff: null,
+    notes: "Requires strict cold chain maintenance (2°C–8°C for secondary distribution)."
+  },
+  {
+    batchId: "BT-MMR-9042",
+    vaccineName: "MMR II (Measles, Mumps, Rubella)",
+    manufacturer: "Merck Sharp & Dohme LLC",
+    totalDoses: 5200,
+    mfgDate: "2026-07-20",
+    expiryDate: "2028-01-20",
+    assignedShipmentId: "SHP-7742",
+    status: "Within Range",
+    quarantineReason: null,
+    quarantinedAt: null,
+    qaSignOff: null,
+    notes: "Lyophilized vaccine with sterile diluent. Protect from light exposure."
+  },
+  {
+    batchId: "BT-ROTA-4410",
+    vaccineName: "Rotavirus Pentavalent (RotaTeq)",
+    manufacturer: "Merck Sharp & Dohme LLC",
+    totalDoses: 10500,
+    mfgDate: "2026-08-01",
+    expiryDate: "2027-08-01",
+    assignedShipmentId: "SHP-9104",
+    status: "In Transit",
+    quarantineReason: null,
+    quarantinedAt: null,
+    qaSignOff: null,
+    notes: "Oral solution, sensitive to freeze/thaw cycles."
+  },
+  {
+    batchId: "BT-VARI-1193",
+    vaccineName: "Varicella Live Virus (Varivax)",
+    manufacturer: "Merck Sharp & Dohme LLC",
+    totalDoses: 6000,
+    mfgDate: "2026-06-15",
+    expiryDate: "2027-06-15",
+    assignedShipmentId: "SHP-6320",
+    status: "Within Range",
+    quarantineReason: null,
+    quarantinedAt: null,
+    qaSignOff: null,
+    notes: "Standard storage 2°C–8°C. Do not freeze reconstitution diluent."
+  },
+  {
+    batchId: "BT-FLU-7820",
+    vaccineName: "FluZone High-Dose Quadrivalent",
+    manufacturer: "Sanofi Pasteur Inc.",
+    totalDoses: 12000,
+    mfgDate: "2026-09-01",
+    expiryDate: "2027-06-30",
+    assignedShipmentId: "SHP-5519",
+    status: "In Transit",
+    quarantineReason: null,
+    quarantinedAt: null,
+    qaSignOff: null,
+    notes: "Senior formulation seasonal influenza vaccine."
+  },
+  {
+    batchId: "BT-PRIOR-501",
+    vaccineName: "Hepatitis B Recombinant",
+    manufacturer: "GlaxoSmithKline",
+    totalDoses: 4500,
+    mfgDate: "2026-05-10",
+    expiryDate: "2028-05-10",
+    assignedShipmentId: "SHP-ARCHIVED",
+    status: "Released",
+    quarantineReason: "Historical excursion during tarmac transfer resolved via stability documentation.",
+    quarantinedAt: "2026-09-28 14:10",
+    qaSignOff: {
+      authorizedBy: "Dr. Elena Rostova (Director of QA / Regulatory Affairs)",
+      timestamp: "2026-09-29 09:30",
+      resolution: "MKT analysis confirmed thermal exposure was within authorized stability threshold (SOP-401). Released for administration."
+    },
+    notes: "Successfully passed QA stability audit and released to clinical inventory."
+  }
+];
+
+export const INITIAL_ALERTS = [
+  {
+    id: "ALT-DEMO-01",
+    severity: "WARNING",
+    temperature: 7.9,
+    timestamp: "2026-10-14 07:15:20",
+    shipmentId: "SHP-9104",
+    vaccine: "Rotavirus Pentavalent (RotaTeq)",
+    acknowledged: true,
+    acknowledgedBy: "S. Patel (Cold-Chain Supervisor)",
+    acknowledgedAt: "2026-10-14 07:22:10",
+    notes: "Brief thermal drift during crossdock loading. Compressor stabilized temperature back to 5.2°C.",
+    quarantineActionTaken: false
+  }
+];
+
+export const INITIAL_CUSTODY_LOGS = [
+  {
+    id: "CUS-8821-01",
+    shipmentId: "SHP-8821",
+    sender: "Basel BioPharma Dispatch (L. Weber)",
+    receiver: "Swiss Cargo SwissPort Terminal (K. Meier)",
+    timestamp: "2026-10-14 06:30 UTC",
+    location: "Basel Logistics Hub Bay 12",
+    verificationMethod: "Cryptographic NFC Seal #ZRH-998",
+    temperatureAtHandoff: 4.1,
+    status: "Verified & Sealed",
+    notes: "Tamper-evident seal verified intact. Dry-ice backup charged."
+  },
+  {
+    id: "CUS-8821-02",
+    shipmentId: "SHP-8821",
+    sender: "Swiss Cargo SwissPort (K. Meier)",
+    receiver: "Swiss Air Cargo Flight LX18 Captain (M. Dubois)",
+    timestamp: "2026-10-14 08:45 UTC",
+    location: "Zurich International Airport (ZRH) Ramp 4",
+    verificationMethod: "Digital IATA Waybill Sign-off",
+    temperatureAtHandoff: 4.2,
+    status: "Verified & In Flight",
+    notes: "Aircraft temperature-controlled cargo hold set to 4.0°C."
+  },
+  {
+    id: "CUS-8821-03",
+    shipmentId: "SHP-8821",
+    sender: "Swiss Air Cargo Dispatch (R. Vance)",
+    receiver: "CryoLogistics Ground Express (Driver T. Adams)",
+    timestamp: "2026-10-14 13:30 EST",
+    location: "JFK International Air Cargo Cold Storage, NY",
+    verificationMethod: "Biometric Handheld Signature",
+    temperatureAtHandoff: 4.3,
+    status: "Verified & Handed Over",
+    notes: "Customs expedited clearance approved. Reefer van #12 pre-cooled."
+  },
+  {
+    id: "CUS-7742-01",
+    shipmentId: "SHP-7742",
+    sender: "Merck West Point Vault (D. Chen)",
+    receiver: "PharmaFlight Ground Transit (B. Miller)",
+    timestamp: "2026-10-14 07:45 EST",
+    location: "West Point Facility Gate 3",
+    verificationMethod: "Dual Smart Key Exchange",
+    temperatureAtHandoff: 3.6,
+    status: "Verified & In Transit",
+    notes: "Continuous GPS logger activated."
+  },
+  {
+    id: "CUS-9104-01",
+    shipmentId: "SHP-9104",
+    sender: "Sanofi Swiftwater Packaging (J. Reynolds)",
+    receiver: "BioTransit Cold Fleet (A. Gomez)",
+    timestamp: "2026-10-14 08:15 EST",
+    location: "Swiftwater Facility Dock 8",
+    verificationMethod: "NFC Secure Handoff #ST-229",
+    temperatureAtHandoff: 5.0,
+    status: "Verified & In Transit",
+    notes: "Pallet thermal wrap verified intact."
+  }
+];
