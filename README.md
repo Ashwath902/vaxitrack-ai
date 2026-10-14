@@ -1,3 +1,4 @@
+
 # VaxiTrack AI — Intelligent Vaccine Cold-Chain Logistics & Excursion Monitoring
 
 **VaxiTrack AI** is an enterprise-grade vaccine cold-chain monitoring dashboard designed for healthcare logistics coordinators, QA compliance directors, and cold-freight carriers. It actively monitors real-time temperature telemetry during transit, triggers rule-based excursion alerts, tracks synthetic GPS breadcrumbs, records verifiable custody transfers, and stages affected batches for authorized review.
@@ -87,3 +88,4 @@
 - **Icons**: Lucide React
 - **Typography**: Plus Jakarta Sans & JetBrains Mono (via Google Fonts)
 - **Data Engine**: Reactive Synthetic Cold-Chain Telemetry Simulation Loop
+
